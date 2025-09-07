@@ -1,20 +1,47 @@
 {
-    "name": "Todo List",
-    "short_name": "Todo",
-    "start_url": ".",
+    "name": "Todo List - Task Manager",
+    "short_name": "TodoList",
+    "start_url": "/",
+    "scope": "/",
     "display": "standalone",
-    "background_color": "#fff",
-    "description": "A simple todo list app.",
+    "orientation": "portrait-primary",
+    "background_color": "#6a11cb",
+    "theme_color": "#6a11cb",
+    "description": "A powerful and beautiful task management app for organizing your daily tasks and productivity.",
+    "categories": ["productivity", "utilities"],
+    "lang": "en",
+    "dir": "ltr",
+    "prefer_related_applications": false,
+    "edge_side_panel": {
+        "preferred_width": 400
+    },
+    "screenshots": [],
     "icons": [
         {
             "src": "icons/icon-192.svg",
             "sizes": "192x192",
-            "type": "image/svg+xml"
+            "type": "image/svg+xml",
+            "purpose": "any maskable"
         },
         {
             "src": "icons/icon-512.svg",
             "sizes": "512x512",
-            "type": "image/svg+xml"
+            "type": "image/svg+xml",
+            "purpose": "any maskable"
+        }
+    ],
+    "shortcuts": [
+        {
+            "name": "Add New Task",
+            "short_name": "Add Task",
+            "description": "Quickly add a new task to your todo list",
+            "url": "/?action=add",
+            "icons": [
+                {
+                    "src": "icons/icon-192.svg",
+                    "sizes": "192x192"
+                }
+            ]
         }
     ]
 }

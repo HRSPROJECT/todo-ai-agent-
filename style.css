@@ -25,14 +25,56 @@
     --transition-speed: 0.3s;
 }
 
+/* PWA Native App Enhancements */
+html {
+    /* Prevent zoom on double tap */
+    touch-action: manipulation;
+    /* Prevent text size adjustment on iOS */
+    -webkit-text-size-adjust: 100%;
+    -ms-text-size-adjust: 100%;
+    /* Smooth scrolling */
+    scroll-behavior: smooth;
+    /* Full height for app-like experience */
+    height: 100%;
+    overflow-x: hidden;
+}
+
 body {
     font-family: 'Inter', sans-serif;
     margin: 0;
     transition: background-color var(--transition-speed) ease, color var(--transition-speed) ease;
+    /* Prevent zoom and improve touch response */
+    touch-action: manipulation;
+    -webkit-touch-callout: none;
+    -webkit-user-select: none;
+    -khtml-user-select: none;
+    -moz-user-select: none;
+    -ms-user-select: none;
+    user-select: none;
+    /* Full height for app-like experience */
+    min-height: 100vh;
+    min-height: -webkit-fill-available;
+    /* Prevent overscroll bounce on iOS */
+    overscroll-behavior: none;
+    -webkit-overflow-scrolling: touch;
 }
 
 body.no-transitions * {
     transition: none !important;
+}
+
+/* Allow text selection for inputs and content areas */
+input, textarea, .task-card-header h3, .task-card-time {
+    -webkit-user-select: text;
+    -moz-user-select: text;
+    -ms-user-select: text;
+    user-select: text;
+}
+
+/* Prevent zoom on input focus for iOS */
+input, select, textarea {
+    font-size: 16px !important; /* Prevents zoom on iOS */
+    transform: translateZ(0); /* Force hardware acceleration */
 }
 
 /* Light Theme Styles */
@@ -49,6 +91,7 @@ body.light-theme .task-card-time { color: var(--light-subtle-text); }
 body.light-theme .task-card-actions button { border-color: var(--light-border); color: var(--light-subtle-text); }
 body.light-theme .task-card-actions button:hover { background-color: var(--light-border); color: var(--light-text); }
 body.light-theme .task-card-actions .deleteBtn:hover { background-color: var(--danger); border-color: var(--danger); color: #fff; }
+body.light-theme .modal-content { background-color: var(--light-card-bg); color: var(--light-text); }
 
 /* Dark Theme Styles */
 body.dark-theme {
@@ -65,11 +108,19 @@ body.dark-theme .task-card-time { color: var(--dark-subtle-text); }
 body.dark-theme .task-card-actions button { border-color: var(--dark-border); color: var(--dark-subtle-text); }
 body.dark-theme .task-card-actions button:hover { background-color: var(--dark-border); color: var(--dark-text); }
 body.dark-theme .task-card-actions .deleteBtn:hover { background-color: var(--danger); border-color: var(--danger); color: #fff; }
+body.dark-theme .modal-content { background-color: var(--dark-card-bg); color: var(--dark-text); }
 
 .app-container {
     max-width: 1100px;
     margin: 0 auto;
     padding: 20px;
+    /* Safe area insets for devices with notches */
+    padding-top: max(20px, env(safe-area-inset-top));
+    padding-bottom: max(20px, env(safe-area-inset-bottom));
+    padding-left: max(20px, env(safe-area-inset-left));
+    padding-right: max(20px, env(safe-area-inset-right));
+    min-height: calc(100vh - 40px);
+    min-height: calc(-webkit-fill-available - 40px);
 }
 
 .app-header {
@@ -147,6 +198,9 @@ h2 { font-size: 1.5rem; font-weight: 600; margin-top: 0; margin-bottom: 20px; }
 }
 
 #addTaskBtn:hover { transform: translateY(-2px); box-shadow: 0 5px 15px rgba(0, 0, 0, 0.2); }
+#addTaskBtn:active {
+    transform: translateY(-1px) scale(0.98);
+}
 
 .task-list-wrapper { padding: 0; }
 #task-list { display: grid; grid-template-columns: 1fr; gap: 20px; }
@@ -159,6 +213,9 @@ h2 { font-size: 1.5rem; font-weight: 600; margin-top: 0; margin-bottom: 20px; }
     flex-direction: column;
     gap: 15px;
     animation: popIn 0.4s ease-out;
+    /* Better touch interaction */
+    touch-action: manipulation;
+    -webkit-tap-highlight-color: transparent;
 }
 
 .task-card-header { display: flex; justify-content: space-between; align-items: flex-start; }
@@ -186,6 +243,218 @@ h2 { font-size: 1.5rem; font-weight: 600; margin-top: 0; margin-bottom: 20px; }
     border-radius: var(--border-radius);
     background-color: transparent;
     font-size: 0.9rem;
+    /* Prevent zoom on double tap */
+    touch-action: manipulation;
+    /* Better touch feedback */
+    -webkit-tap-highlight-color: transparent;
+    /* Smooth transitions */
+    transition: all 0.2s ease;
+    cursor: pointer;
 }
 
+/* Active states for better touch feedback */
+button:active, .statusBtn:active, .deleteBtn:active {
+    transform: scale(0.98);
+}
+
+.modal-overlay {
+    position: fixed;
+    top: 0;
+    left: 0;
+    width: 100%;
+    height: 100%;
+    background-color: rgba(0, 0, 0, 0.5);
+    display: flex;
+    justify-content: center;
+    align-items: center;
+    z-index: 1000;
+    animation: fadeIn 0.3s ease-out;
+    /* Prevent background scroll when modal is open */
+    overscroll-behavior: none;
+    -webkit-overflow-scrolling: touch;
+}
+
+.modal-content {
+    padding: 30px;
+    border-radius: var(--border-radius);
+    box-shadow: 0 10px 30px rgba(0, 0, 0, 0.2);
+    width: 90%;
+    max-width: 400px;
+    animation: slideInUp 0.4s ease-out;
+    /* Safe area support */
+    margin: env(safe-area-inset-top) env(safe-area-inset-right) env(safe-area-inset-bottom) env(safe-area-inset-left);
+}
+
+.modal-content p { margin: 0 0 20px; font-size: 1.1rem; }
+
+.modal-actions {
+    display: flex;
+    justify-content: flex-end;
+    gap: 15px;
+}
+
+.modal-actions button {
+    padding: 10px 20px;
+    border-radius: var(--border-radius);
+    border: none;
+    cursor: pointer;
+    font-weight: 600;
+}
+
+#modal-cancel-btn { background-color: #ccc; color: #333; }
+#modal-confirm-btn { background-color: var(--danger); color: #fff; }
+
+/* Skeleton Loader Styles */
+.skeleton-loader {
+    display: grid;
+    grid-template-columns: 1fr;
+    gap: 20px;
+}
+
+.skeleton-card {
+    border-radius: var(--border-radius);
+    box-shadow: var(--shadow);
+    padding: 20px;
+    display: flex;
+    flex-direction: column;
+    gap: 15px;
+    animation: pulse 1.5s ease-in-out infinite;
+}
+
+.skeleton-header {
+    display: flex;
+    justify-content: space-between;
+    align-items: flex-start;
+}
+
+.skeleton-title {
+    height: 20px;
+    width: 60%;
+    border-radius: 4px;
+    background: linear-gradient(90deg, #f0f0f0 25%, #e0e0e0 50%, #f0f0f0 75%);
+    background-size: 200% 100%;
+    animation: loading 1.5s infinite;
+}
+
+.skeleton-status {
+    height: 24px;
+    width: 80px;
+    border-radius: 20px;
+    background: linear-gradient(90deg, #f0f0f0 25%, #e0e0e0 50%, #f0f0f0 75%);
+    background-size: 200% 100%;
+    animation: loading 1.5s infinite;
+}
+
+.skeleton-time {
+    height: 16px;
+    width: 40%;
+    border-radius: 4px;
+    background: linear-gradient(90deg, #f0f0f0 25%, #e0e0e0 50%, #f0f0f0 75%);
+    background-size: 200% 100%;
+    animation: loading 1.5s infinite;
+}
+
+.skeleton-actions {
+    display: flex;
+    gap: 10px;
+    margin-top: 10px;
+}
+
+.skeleton-button {
+    height: 32px;
+    width: 60px;
+    border-radius: var(--border-radius);
+    background: linear-gradient(90deg, #f0f0f0 25%, #e0e0e0 50%, #f0f0f0 75%);
+    background-size: 200% 100%;
+    animation: loading 1.5s infinite;
+}
+
+/* Dark theme skeleton styles */
+body.dark-theme .skeleton-title,
+body.dark-theme .skeleton-status,
+body.dark-theme .skeleton-time,
+body.dark-theme .skeleton-button {
+    background: linear-gradient(90deg, #2d3748 25%, #4a5568 50%, #2d3748 75%);
+    background-size: 200% 100%;
+}
+
+body.dark-theme .skeleton-card {
+    background-color: var(--dark-card-bg);
+}
+
+body.light-theme .skeleton-card {
+    background-color: var(--light-card-bg);
+}
+
+/* Mobile-first responsive improvements */
+@media (max-width: 768px) {
+    .app-container {
+        padding: 16px;
+        padding-top: max(16px, env(safe-area-inset-top));
+        padding-bottom: max(16px, env(safe-area-inset-bottom));
+    }
+    
+    .app-header {
+        padding: 16px 0;
+    }
+    
+    .app-main {
+        gap: 24px;
+    }
+    
+    .add-task-wrapper {
+        padding: 20px;
+    }
+    
+    .task-card {
+        padding: 16px;
+    }
+    
+    /* Larger touch targets for mobile */
+    .task-card-actions button {
+        padding: 12px 16px;
+        min-height: 44px; /* iOS minimum touch target */
+    }
+    
+    #addTaskBtn {
+        min-height: 48px;
+        font-size: 16px;
+    }
+}
+
+/* Landscape orientation adjustments */
+@media (orientation: landscape) and (max-height: 500px) {
+    .app-header {
+        padding: 10px 0;
+    }
+    
+    .app-main {
+        gap: 20px;
+    }
+    
+    .add-task-wrapper, .task-card {
+        padding: 16px;
+    }
+}
+
+@keyframes loading {
+    0% {
+        background-position: 200% 0;
+    }
+    100% {
+        background-position: -200% 0;
+    }
+}
+
+@keyframes pulse {
+    0%, 100% {
+        opacity: 1;
+    }
+    50% {
+        opacity: 0.8;
+    }
+}
+
+@keyframes fadeIn { from { opacity: 0; } to { opacity: 1; } }
+@keyframes slideInUp { from { transform: translateY(30px); opacity: 0; } to { transform: translateY(0); opacity: 1; } }
 @keyframes popIn { from { opacity: 0; transform: scale(0.95); } to { opacity: 1; transform: scale(1); } }

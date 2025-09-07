@@ -1,0 +1,158 @@
+function getColumnIndexByName(sheet, name) {
+  const headers = sheet.getRange(1, 1, 1, sheet.getLastColumn()).getValues()[0];
+  return headers.indexOf(name) + 1;
+}
+
+function sendTaskAddedEmail(taskData) {
+  try {
+    const emailAddress = 'harsheetgundecha984@gmail.com';
+    const subject = '✅ New Task Added to Your TODO List';
+    
+    const htmlBody = `
+      <div style="font-family: Arial, sans-serif; max-width: 600px; margin: 0 auto; padding: 20px; background-color: #f4f7f9;">
+        <div style="background: linear-gradient(45deg, #6a11cb, #2575fc); padding: 20px; border-radius: 8px; margin-bottom: 20px;">
+          <h1 style="color: white; margin: 0; text-align: center;">📋 Task Added Successfully!</h1>
+        </div>
+        
+        <div style="background-color: white; padding: 30px; border-radius: 8px; box-shadow: 0 4px 6px rgba(0,0,0,0.1);">
+          <h2 style="color: #1a202c; margin-top: 0;">Task Details:</h2>
+          
+          <div style="background-color: #f8f9fa; padding: 15px; border-radius: 6px; margin: 15px 0;">
+            <p style="margin: 0; font-size: 16px;"><strong>📝 Task:</strong> ${taskData.task}</p>
+          </div>
+          
+          <div style="background-color: #f8f9fa; padding: 15px; border-radius: 6px; margin: 15px 0;">
+            <p style="margin: 0; font-size: 16px;"><strong>⏰ Time Commitment:</strong> ${taskData.time}</p>
+          </div>
+          
+          <div style="background-color: #f8f9fa; padding: 15px; border-radius: 6px; margin: 15px 0;">
+            <p style="margin: 0; font-size: 16px;"><strong>📊 Status:</strong> 
+              <span style="background-color: #dd6b20; color: white; padding: 4px 8px; border-radius: 12px; font-size: 14px;">${taskData.status}</span>
+            </p>
+          </div>
+          
+          <div style="background-color: #e8f5e8; padding: 15px; border-radius: 6px; margin: 20px 0; border-left: 4px solid #38a169;">
+            <p style="margin: 0; color: #2d5a3d;"><strong>✨ Added on:</strong> ${new Date().toLocaleString()}</p>
+          </div>
+          
+          <div style="text-align: center; margin-top: 30px;">
+            <a href="https://script.google.com/macros/s/AKfycbxh8tLutsSIbjoVFjLy5HHnxHqcIpTXogmVIq2x77eGQ9VNHvc2TU9e_DU4C8tzvOoNNw/exec" 
+               style="background: linear-gradient(45deg, #6a11cb, #2575fc); color: white; padding: 12px 24px; text-decoration: none; border-radius: 6px; font-weight: bold;">
+              📱 Open TODO App
+            </a>
+          </div>
+        </div>
+        
+        <div style="text-align: center; margin-top: 20px; color: #718096; font-size: 14px;">
+          <p>This email was sent automatically from your TODO List application.</p>
+        </div>
+      </div>
+    `;
+    
+    const plainTextBody = `
+New Task Added to Your TODO List
+
+Task Details:
+📝 Task: ${taskData.task}
+⏰ Time Commitment: ${taskData.time}
+📊 Status: ${taskData.status}
+✨ Added on: ${new Date().toLocaleString()}
+
+This email was sent automatically from your TODO List application.
+    `;
+    
+    MailApp.sendEmail({
+      to: emailAddress,
+      subject: subject,
+      htmlBody: htmlBody,
+      body: plainTextBody
+    });
+    
+    console.log('Email sent successfully to ' + emailAddress);
+    return true;
+  } catch (error) {
+    console.error('Failed to send email:', error);
+    return false;
+  }
+}
+
+function doGet(e) {
+  const sheet = SpreadsheetApp.getActiveSpreadsheet().getActiveSheet();
+  const data = sheet.getDataRange().getValues();
+  const headers = data.shift();
+  const tasks = data.map(row => {
+    let task = {};
+    headers.forEach((header, index) => {
+      // Normalize header names to match frontend expectations
+      const normalizedHeader = header.toLowerCase().trim();
+      if (normalizedHeader === 'task' || normalizedHeader === 'task description') {
+        task['task'] = row[index];
+      } else if (normalizedHeader === 'time' || normalizedHeader === 'time commitment') {
+        task['time'] = row[index];
+      } else if (normalizedHeader === 'status') {
+        task['status'] = row[index];
+      }
+    });
+    return task;
+  });
+  return ContentService.createTextOutput(JSON.stringify(tasks)).setMimeType(ContentService.MimeType.JSON);
+}
+
+function doPost(e) {
+  const sheet = SpreadsheetApp.getActiveSpreadsheet().getActiveSheet();
+  const task = JSON.parse(e.postData.contents);
+
+  if (task.action === 'add') {
+    // Get the headers to determine the correct column order
+    const headers = sheet.getRange(1, 1, 1, sheet.getLastColumn()).getValues()[0];
+    const row = [];
+    
+    // Build the row based on the actual header order in your sheet
+    headers.forEach(header => {
+      const normalizedHeader = header.toLowerCase().trim();
+      if (normalizedHeader === 'task' || normalizedHeader === 'task description') {
+        row.push(task.task);
+      } else if (normalizedHeader === 'time' || normalizedHeader === 'time commitment') {
+        row.push(task.time);
+      } else if (normalizedHeader === 'status') {
+        row.push(task.status);
+      } else {
+        row.push(''); // Empty cell for unknown columns
+      }
+    });
+    
+    sheet.appendRow(row);
+    
+    // Send email notification
+    const emailSent = sendTaskAddedEmail({
+      task: task.task,
+      time: task.time,
+      status: task.status
+    });
+    
+    const message = emailSent ? 
+      'Task added successfully! Email notification sent to harsheetgundecha984@gmail.com' : 
+      'Task added successfully! (Email notification failed)';
+    
+    return ContentService.createTextOutput(JSON.stringify({
+      result: 'success', 
+      message: message,
+      emailSent: emailSent
+    })).setMimeType(ContentService.MimeType.JSON);
+  } else if (task.action === 'delete') {
+    const row = parseInt(task.id) + 2;
+    sheet.deleteRow(row);
+    return ContentService.createTextOutput(JSON.stringify({result: 'success'})).setMimeType(ContentService.MimeType.JSON);
+  } else if (task.action === 'updateStatus') {
+    const row = parseInt(task.id) + 2;
+    const statusColumn = getColumnIndexByName(sheet, 'status');
+    if (statusColumn > 0) {
+      sheet.getRange(row, statusColumn).setValue(task.status);
+      return ContentService.createTextOutput(JSON.stringify({result: 'success'})).setMimeType(ContentService.MimeType.JSON);
+    } else {
+      return ContentService.createTextOutput(JSON.stringify({result: 'error', message: 'Status column not found'})).setMimeType(ContentService.MimeType.JSON);
+    }
+  }
+
+  return ContentService.createTextOutput(JSON.stringify({result: 'error', message: 'Invalid action'})).setMimeType(ContentService.MimeType.JSON);
+}
