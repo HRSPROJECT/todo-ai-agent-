@@ -1,0 +1,191 @@
+@import url('https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700&display=swap');
+
+:root {
+    --primary-color: #6a11cb;
+    --secondary-color: #2575fc;
+    --light-bg: #f4f7f9;
+    --light-card-bg: #ffffff;
+    --light-text: #1a202c;
+    --light-subtle-text: #718096;
+    --light-border: #e2e8f0;
+
+    --dark-bg: #1a202c;
+    --dark-card-bg: #2d3748;
+    --dark-text: #e2e8f0;
+    --dark-subtle-text: #a0aec0;
+    --dark-border: #4a5568;
+
+    --success: #38a169;
+    --warning: #dd6b20;
+    --danger: #e53e3e;
+    --info: #3182ce;
+
+    --shadow: 0 4px 6px -1px rgba(0, 0, 0, 0.1), 0 2px 4px -1px rgba(0, 0, 0, 0.06);
+    --border-radius: 8px;
+    --transition-speed: 0.3s;
+}
+
+body {
+    font-family: 'Inter', sans-serif;
+    margin: 0;
+    transition: background-color var(--transition-speed) ease, color var(--transition-speed) ease;
+}
+
+body.no-transitions * {
+    transition: none !important;
+}
+
+/* Light Theme Styles */
+body.light-theme {
+    background-color: var(--light-bg);
+    color: var(--light-text);
+}
+body.light-theme .app-header .logo h1 { color: var(--light-text); }
+body.light-theme #theme-switcher { background-color: var(--light-card-bg); border-color: var(--light-border); }
+body.light-theme .add-task-wrapper { background-color: var(--light-card-bg); }
+body.light-theme #add-task-form input, body.light-theme #add-task-form select { background-color: var(--light-bg); color: var(--light-text); border-color: var(--light-border); }
+body.light-theme .task-card { background-color: var(--light-card-bg); }
+body.light-theme .task-card-time { color: var(--light-subtle-text); }
+body.light-theme .task-card-actions button { border-color: var(--light-border); color: var(--light-subtle-text); }
+body.light-theme .task-card-actions button:hover { background-color: var(--light-border); color: var(--light-text); }
+body.light-theme .task-card-actions .deleteBtn:hover { background-color: var(--danger); border-color: var(--danger); color: #fff; }
+
+/* Dark Theme Styles */
+body.dark-theme {
+    background-color: var(--dark-bg);
+    color: var(--dark-text);
+}
+body.dark-theme .app-header .logo h1 { color: var(--dark-text); }
+body.dark-theme #theme-switcher { background-color: var(--dark-card-bg); border-color: var(--dark-border); }
+body.dark-theme .add-task-wrapper { background-color: var(--dark-card-bg); }
+body.dark-theme h2 { color: var(--dark-text); }
+body.dark-theme #add-task-form input, body.dark-theme #add-task-form select { background-color: var(--dark-bg); color: var(--dark-text); border-color: var(--dark-border); }
+body.dark-theme .task-card { background-color: var(--dark-card-bg); }
+body.dark-theme .task-card-time { color: var(--dark-subtle-text); }
+body.dark-theme .task-card-actions button { border-color: var(--dark-border); color: var(--dark-subtle-text); }
+body.dark-theme .task-card-actions button:hover { background-color: var(--dark-border); color: var(--dark-text); }
+body.dark-theme .task-card-actions .deleteBtn:hover { background-color: var(--danger); border-color: var(--danger); color: #fff; }
+
+.app-container {
+    max-width: 1100px;
+    margin: 0 auto;
+    padding: 20px;
+}
+
+.app-header {
+    display: flex;
+    justify-content: space-between;
+    align-items: center;
+    padding: 20px 0;
+}
+
+.app-header .logo h1 {
+    font-size: 1.8rem;
+    font-weight: 700;
+    margin: 0;
+}
+
+#theme-switcher {
+    display: flex;
+    align-items: center;
+    cursor: pointer;
+    border-radius: 30px;
+    padding: 5px;
+    position: relative;
+    width: 60px;
+    height: 30px;
+}
+
+#theme-switcher .sun-icon, #theme-switcher .moon-icon {
+    position: absolute;
+    top: 50%;
+    transform: translateY(-50%);
+    transition: opacity 0.2s ease, transform 0.3s ease;
+}
+
+#theme-switcher .sun-icon { left: 7px; color: #f6e05e; }
+#theme-switcher .moon-icon { right: 7px; color: #a0aec0; }
+
+body.light-theme #theme-switcher .sun-icon { opacity: 1; transform: translateY(-50%) rotate(0deg); }
+body.light-theme #theme-switcher .moon-icon { opacity: 0; transform: translateY(-50%) rotate(90deg); }
+body.dark-theme #theme-switcher .sun-icon { opacity: 0; transform: translateY(-50%) rotate(-90deg); }
+body.dark-theme #theme-switcher .moon-icon { opacity: 1; transform: translateY(-50%) rotate(0deg); }
+
+.app-main { display: grid; grid-template-columns: 1fr; gap: 40px; }
+@media (min-width: 992px) { .app-main { grid-template-columns: 350px 1fr; } }
+
+h2 { font-size: 1.5rem; font-weight: 600; margin-top: 0; margin-bottom: 20px; }
+
+.add-task-wrapper { padding: 30px; border-radius: var(--border-radius); box-shadow: var(--shadow); }
+#add-task-form { display: flex; flex-direction: column; gap: 20px; }
+
+#add-task-form input, #add-task-form select {
+    width: 100%;
+    padding: 12px;
+    border: 1px solid;
+    border-radius: var(--border-radius);
+    font-size: 1rem;
+    box-sizing: border-box;
+}
+
+#add-task-form input:focus, #add-task-form select:focus {
+    outline: none;
+    border-color: var(--primary-color);
+    box-shadow: 0 0 0 3px rgba(106, 17, 203, 0.2);
+}
+
+#addTaskBtn {
+    padding: 12px;
+    background: linear-gradient(45deg, var(--primary-color), var(--secondary-color));
+    color: white;
+    border: none;
+    cursor: pointer;
+    border-radius: var(--border-radius);
+    font-size: 1rem;
+    font-weight: 600;
+    transition: transform 0.2s, box-shadow 0.3s;
+}
+
+#addTaskBtn:hover { transform: translateY(-2px); box-shadow: 0 5px 15px rgba(0, 0, 0, 0.2); }
+
+.task-list-wrapper { padding: 0; }
+#task-list { display: grid; grid-template-columns: 1fr; gap: 20px; }
+
+.task-card {
+    border-radius: var(--border-radius);
+    box-shadow: var(--shadow);
+    padding: 20px;
+    display: flex;
+    flex-direction: column;
+    gap: 15px;
+    animation: popIn 0.4s ease-out;
+}
+
+.task-card-header { display: flex; justify-content: space-between; align-items: flex-start; }
+.task-card-header h3 { font-size: 1.2rem; font-weight: 600; margin: 0; }
+.task-card-time { font-size: 0.9rem; }
+
+.task-card-status {
+    font-size: 0.9rem;
+    font-weight: 500;
+    padding: 5px 10px;
+    border-radius: 20px;
+    color: #fff;
+}
+
+.task-card-status.pending { background-color: var(--warning); }
+.task-card-status.in-progress { background-color: var(--info); }
+.task-card-status.done { background-color: var(--success); }
+
+.task-card-actions { display: flex; gap: 10px; margin-top: 10px; }
+
+.task-card-actions button {
+    padding: 8px 12px;
+    cursor: pointer;
+    border: 1px solid;
+    border-radius: var(--border-radius);
+    background-color: transparent;
+    font-size: 0.9rem;
+}
+
+@keyframes popIn { from { opacity: 0; transform: scale(0.95); } to { opacity: 1; transform: scale(1); } }
